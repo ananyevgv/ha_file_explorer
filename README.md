@@ -10,7 +10,7 @@ file explorer for home assistant
 ![license](https://img.shields.io/github/license/shaonianzhentan/ha_file_explorer)
 ![visit](https://visitor-badge.laobi.icu/badge?page_id=shaonianzhentan.ha_file_explorer&left_text=visit)
 
-English | [简体中文](README.zh.md)
+Русский | [简体中文](README.zh.md)
 
 ## Installation
 

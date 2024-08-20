@@ -1,4 +1,4 @@
-import os
+mport os
 from homeassistant.components.http import HomeAssistantView
 from .file_api import delete_file, get_dir_list, mkdir, load_content, save_content
 
@@ -28,10 +28,10 @@ class HttpApi(HomeAssistantView):
         config_path = self.get_config_path(query.get('path', ''))
         path = hass.config.path(config_path)
         if act == 'content':
-            data = load_content(path)
+            data = await hass.async_add_executor_job(load_content, path)
             return self.json({ 'code': 0, 'data': data})
 
-        data = get_dir_list(path)
+        data = await hass.async_add_executor_job(get_dir_list, path)
         return self.json(data) 
 
     # delete file or folder
@@ -40,8 +40,8 @@ class HttpApi(HomeAssistantView):
         query = request.query
         config_path = self.get_config_path(query.get('path', ''))
         path = hass.config.path(config_path)
-        delete_file(path)
-        return self.json({ 'code': 0, 'msg': 'Успешно удалено'})
+        await hass.async_add_executor_job(delete_file, path)
+        return self.json({ 'code': 0, 'msg': 'Успешно удален'})
 
     # add file or folder
     async def put(self, request):
@@ -66,17 +66,17 @@ class HttpApi(HomeAssistantView):
             return self.json({ 'code': 1, 'msg': 'Такое же название уже существует'})
 
         if act == 'file':
-            save_content(path, '')
+            await hass.async_add_executor_job(save_content, path, '')
         elif act == 'folder':
-            mkdir(path)
+            await hass.async_add_executor_job(mkdir, path)
 
-        return self.json({ 'code': 0, 'msg': 'Создан успешно'})
+        return self.json({ 'code': 0, 'msg': 'Успешно создан'})
 
     async def post(self, request):
-        # 文件限制调整到100MB
+        # Ограничение на количество файлов устанавливается следующим образом 100MB
         request.app._client_max_size = 1024**2 * 100
         hass = request.app["hass"]
-        # 上传文件
+        # Загрузить файл
         query = request.query
         if query.get('path') is not None:
             config_path = self.get_config_path(query.get('path'))
@@ -85,20 +85,20 @@ class HttpApi(HomeAssistantView):
             reader = await request.multipart()
             file = await reader.next()
             # print(file.filename)
-            mkdir(dir_path)
+            await hass.async_add_executor_job(mkdir, dir_path)
             # create file
             size = 0
             with open(path, 'wb') as f:
                 while True:
-                    chunk = await file.read_chunk()  # 默认是8192个字节。
+                    chunk = await file.read_chunk()  #Размер загружаемого файла по умолчанию составляет 8192 байта。
                     if not chunk:
                         break
                     size += len(chunk)
                     f.write(chunk)
-            return self.json({ 'code': 0, 'msg': 'Создан успешно'})
+            return self.json({ 'code': 0, 'msg': 'Успешная загрузка'})
         else:
             body = await request.json()
             config_path = self.get_config_path(body.get('path'))
             path = hass.config.path(config_path)
-            save_content(path, body.get('data'))
-            return self.json({ 'code': 0, 'msg': 'Сохранено успешно'})
+            await hass.async_add_executor_job(save_content, path, body.get('data'))
+            return self.json({ 'code': 0, 'msg': 'Успешно сохранен'})

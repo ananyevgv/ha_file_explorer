@@ -29,7 +29,7 @@ After installation, restart home assistant, refresh the page and search for `ha_
 
 ## Screenshot
 
-![pic](https://cdn.jsdelivr.net/gh/shaonianzhentan/image@main/ha_file_explorer/ha_file_explorer.png)
+![pic](https://github.com/ananyevgv/ha_file_explorer/blob/master/russ.png)
 
 ## If this project is helpful to you, please donate a cup of <del style="font-size: 14px;">coffee</del> milk tea 😘
 | |Alipay|WeChat|

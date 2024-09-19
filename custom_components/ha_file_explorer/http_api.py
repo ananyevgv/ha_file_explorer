@@ -87,18 +87,18 @@ class HttpApi(HomeAssistantView):
             # print(file.filename)
             await hass.async_add_executor_job(mkdir, dir_path)
             # create file
-            size = 0
-            with open(path, 'wb') as f:
-                while True:
-                    chunk = await file.read_chunk()  #Размер загружаемого файла по умолчанию составляет 8192 байта。
-                    if not chunk:
-                        break
-                    size += len(chunk)
-                    f.write(chunk)
+            f = await hass.async_add_executor_job(open, path, 'wb')
+            while True:
+                chunk = await file.read_chunk()  # Размер загружаемого файла по умолчанию составляет 8192 байта。
+                if not chunk:
+                    break
+                await hass.async_add_executor_job(f.write, chunk)
+            f.close()
+
             return self.json({ 'code': 0, 'msg': 'Успешная загрузка'})
         else:
             body = await request.json()
             config_path = self.get_config_path(body.get('path'))
             path = hass.config.path(config_path)
             await hass.async_add_executor_job(save_content, path, body.get('data'))
-            return self.json({ 'code': 0, 'msg': 'Успешно сохранен'})
+            return self.json({ 'code': 0, 'msg': 'Успешно сохранен'}

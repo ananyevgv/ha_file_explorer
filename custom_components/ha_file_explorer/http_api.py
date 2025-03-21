@@ -49,7 +49,7 @@ class HttpApi(HomeAssistantView):
         config_path = self.get_config_path(query.get('path', ''))
         path = hass.config.path(config_path)
         await hass.async_add_executor_job(delete_file, path)
-        return self.json({ 'code': 0, 'msg': '删除成功'})
+        return self.json({ 'code': 0, 'msg': 'Успешно удален'})
 
     # add file or folder
     async def put(self, request):
@@ -64,21 +64,21 @@ class HttpApi(HomeAssistantView):
         if act == 'rename':
             new_path = hass.config.path(self.get_config_path(body.get('new_path')))
             if os.path.exists(new_path):
-                return self.json({ 'code': 1, 'msg': '已存在相同名称'})
+                return self.json({ 'code': 1, 'msg': 'Такое же название уже существует'})
 
             os.rename(path, new_path)
-            return self.json({ 'code': 0, 'msg': '操作成功'})
+            return self.json({ 'code': 0, 'msg': 'Успешная операция'})
 
         # create file or folder
         if os.path.exists(path):
-            return self.json({ 'code': 1, 'msg': '已存在相同名称'})
+            return self.json({ 'code': 1, 'msg': 'Такое же название уже существует'})
 
         if act == 'file':
             await hass.async_add_executor_job(save_content, path, '')
         elif act == 'folder':
             await hass.async_add_executor_job(mkdir, path)
 
-        return self.json({ 'code': 0, 'msg': '创建成功'})
+        return self.json({ 'code': 0, 'msg': 'Успешно создан'})
 
     async def post(self, request):
         # 文件限制调整到100MB
@@ -103,10 +103,10 @@ class HttpApi(HomeAssistantView):
                 await hass.async_add_executor_job(f.write, chunk)
             f.close()
 
-            return self.json({ 'code': 0, 'msg': '上传成功'})
+            return self.json({ 'code': 0, 'msg': 'Успешная загрузка'})
         else:
             body = await request.json()
             config_path = self.get_config_path(body.get('path'))
             path = hass.config.path(config_path)
             await hass.async_add_executor_job(save_content, path, body.get('data'))
-            return self.json({ 'code': 0, 'msg': '保存成功'})
+            return self.json({ 'code': 0, 'msg': 'Успешно сохранен'})
